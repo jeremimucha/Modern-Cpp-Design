@@ -21,7 +21,12 @@ std::unique_ptr<T> create(Type<T>, Args&&... args)
     return std::make_unique<T>(std::forward<Args>(args)...);
 }
 
-struct Widget { };
+struct Widget {
+    Widget(char const* const s, int i)
+        : str{s}, val{i} { }
+    char const* str;
+    int const val;
+};
 
 template<typename... Args>
 std::unique_ptr<Widget> create(Type<Widget>, Args&&... args)
@@ -34,5 +39,5 @@ int main()
 {
     // use create
     auto str = create(Type<std::string>{}, 42, 'C');
-    auto widget = create(Type<Widget>{}, "this", "is", 'a', "widget");
+    auto widget = create(Type<Widget>{}, "this is a widget");
 }

@@ -42,7 +42,7 @@ private:
 public:
     void do_something(T* p)
     {
-        do_something(p, ct_bool<is_polymorphic>);
+        do_something(p, ct_bool<is_polymorphic>{});
     }
 };
 
