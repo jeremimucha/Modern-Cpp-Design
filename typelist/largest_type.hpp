@@ -44,8 +44,6 @@ using lst3 = typelist<int, double, char>;
 static_assert(std::is_same_v<largest_type_t<lst3>,double>);
 } // namespace largest_type_unit_test
 
-} // namespace largest_type_alternative_impl
-
 
 namespace largest_type_alt_impl
 {

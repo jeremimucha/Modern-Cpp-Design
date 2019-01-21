@@ -9,7 +9,7 @@ template<typename List> struct reverse_impl;
 template<template<typename...>class List, typename T, typename... Ts>
 struct reverse_impl<List<T,Ts...>>
 {
-    using type = push_back_t<typename reverse<List<Ts...>>::type, T>;
+    using type = push_back_t<typename reverse_impl<List<Ts...>>::type, T>;
 };
 
 template<template<typename...>class List>
@@ -35,7 +35,6 @@ namespace reverse_unit_test
     static_assert(std::is_same_v<reverse_t<lst2>,typelist<char,int>>);
     static_assert(std::is_same_v<reverse_t<lst3>,typelist<double,char,int>>);
 } // reverse_unit_test
-
 
 
 namespace reverse_alt_impl

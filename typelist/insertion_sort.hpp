@@ -4,7 +4,101 @@
 #include <type_traits>
 #include "is_empty.hpp"
 #include "identity.hpp"
+#include "ifthenelse.hpp"
 
+
+namespace insertion_sort_alt_impl
+{
+
+template<typename List,
+         typename Element,
+         template<typename, typename> class Compare>
+struct insert_sorted_impl;
+
+template<template<typename...>class List,
+         typename Element,
+         template<typename, typename> class Compare,
+         typename T,
+         typename... Ts>
+struct insert_sorted_impl<List<T, Ts...>, Element, Compare>
+{
+private:
+    using new_tail =
+        typename if_then_else_t<Compare<Element, T>::value,
+                                identity<List<T, Ts...>>,
+                                insert_sorted_impl<List<Ts...>, Element, Compare>
+                                >::type;
+
+    using new_head = if_then_else_t<Compare<Element, T>::value,
+                                    Element,
+                                    T>;
+public:
+    using type = push_front_t<new_tail, new_head>;
+};
+
+template<template<typename...> class List,
+         typename Element,
+         template<typename, typename> class Compare>
+struct insert_sorted_impl<List<>, Element, Compare>
+    : push_front<List<>,Element>
+{
+};
+
+template<typename List,
+         typename Element,
+         template<typename, typename> class Compare>
+struct insert_sorted : insert_sorted_impl<List, Element, Compare> { };
+
+template<typename List, typename Element,
+         template<typename,typename>class Compare>
+using insert_sorted_t = typename insert_sorted_impl<List,Element,Compare>::type;
+
+
+template<typename List,
+         template<typename,typename>class Compare>
+struct insertion_sort_impl;
+
+template<typename List,
+         template<typename,typename>class Compare>
+using insertion_sort_t = typename insertion_sort_impl<List,Compare>::type;
+
+template<template<typename...>class List,
+         template<typename,typename>class Compare,
+         typename T, typename... Ts>
+struct insertion_sort_impl<List<T,Ts...>,Compare>
+    : insert_sorted<insertion_sort_t<List<Ts...>, Compare>, T, Compare> { };
+
+template<template<typename...>class List,
+         template<typename,typename>class Compare>
+struct insertion_sort_impl<List<>,Compare>
+{
+    using type = List<>;
+};
+
+template<typename List,
+         template<typename,typename>class Compare>
+struct insertion_sort : insertion_sort_impl<List,Compare> { };
+
+// template<typename List,
+//          template<typename,typename>class Compare>
+// using insertion_sort_t = typename insertion_sort_impl<List,Compare>::type;
+
+
+namespace insertion_sort_unit_test
+{
+template<typename T, typename U>
+struct smaller_than {
+    static inline constexpr bool value = sizeof(T) < sizeof(U);
+};
+
+using lst = typelist<int,short,char,double>;
+using lst_sorted = insertion_sort_t<lst, smaller_than>;
+static_assert(std::is_same_v<lst_sorted, typelist<char,short,int,double>>);
+}
+} // namespace insertion_sort_alt_impl
+
+// namespace insertion_sort_alt_impl
+// {
 
 template<typename List, typename Element,
          template<typename,typename> class Compare,
@@ -86,94 +180,5 @@ static_assert(std::is_same_v<lst_sorted, typelist<char,short,int,double>>);
 
 } // unit_test_insertion_sort
 
+// } // insertion_sort_alt_impl
 
-namespace insertion_sort_alt_impl
-{
-
-template<typename T> struct identity { using type = T; };
-template<bool B, typename T, typename U> struct if_then_else { using type = T; };
-template<typename T, typename U> struct if_then_else<false,T,U> { using type = U; };
-template<bool B, typename T, typename U>
-using if_then_else_t = typename if_then_else<B,T,U>::type;
-
-
-template<typename List, typename Element,
-         template<typename,typename> class Compare>
-struct insert_sorted_impl;
-
-template<template<typename...>class List, typename Element,
-         template<typename,typename> class Compare,
-         typename T, typename... Ts>
-struct insert_sorted_impl<List<T,Ts...>,Element,Compare>
-{
-private:
-    using new_tail =
-        typename if_then_else_t<Compare<Element,T>::value,
-                                identity<List<T,Ts...>>,
-                                insert_sorted_impl<List<Ts...>, Element, Compare>
-                                >::type;
-
-    using new_head = if_then_else_t<Compare<Element,T>::value,
-                                    Element,
-                                    T>;
-public:
-    using type = push_front_t<new_tail, new_head>;
-};
-
-template<template<typename...>class List, typename Element,
-         template<typename,typename> class Compare>
-struct insert_sorted_impl<List<>,Element,Compare>
-    : push_front<List<>,Element>
-{
-};
-
-template<typename List, typename Element,
-         template<typename,typename>class Compare>
-struct insert_sorted : insert_sorted_impl<List,Element,Compare> { };
-
-template<typename List, typename Element,
-         template<typename,typename>class Compare>
-using insert_sorted_t = typename insert_sorted_impl<List,Element,Compare>::type;
-
-
-template<typename List,
-         template<typename,typename>class Compare>
-struct insertion_sort_impl;
-
-template<typename List,
-         template<typename,typename>class Compare>
-using insertion_sort_t = typename insertion_sort_impl<List,Compare>::type;
-
-template<template<typename...>class List,
-         template<typename,typename>class Compare,
-         typename T, typename... Ts>
-struct insertion_sort_impl<List<T,Ts...>,Compare>
-    : insert_sorted<insertion_sort_t<List<Ts...>, Compare>, T, Compare> { };
-
-template<template<typename...>class List,
-         template<typename,typename>class Compare>
-struct insertion_sort_impl<List<>,Compare>
-{
-    using type = List<>;
-};
-
-template<typename List,
-         template<typename,typename>class Compare>
-struct insertion_sort : insertion_sort_impl<List,Compare> { };
-
-// template<typename List,
-//          template<typename,typename>class Compare>
-// using insertion_sort_t = typename insertion_sort_impl<List,Compare>::type;
-
-
-// unit test
-template<typename T, typename U>
-struct smaller_than {
-    static inline constexpr bool value = sizeof(T) < sizeof(U);
-};
-
-using lst = typelist<int,short,char,double>;
-using lst_sorted = insertion_sort_t<lst, smaller_than>;
-static_assert(std::is_same_v<lst_sorted, typelist<char,short,int,double>>);
-
-} // insertion_sort_alt_impl

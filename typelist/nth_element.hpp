@@ -11,7 +11,7 @@ struct nth_element_impl<List<T,Ts...>, N> : nth_element_impl<List<Ts...>, N-1>
 {
 };
 
-template<typename<typename...> class List, typename T, typename... Ts>
+template<template<typename...> class List, typename T, typename... Ts>
 struct nth_element_impl<List<T,Ts...>, 0> {
     using type = T;
 };
