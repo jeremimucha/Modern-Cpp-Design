@@ -15,7 +15,9 @@
 #include "typelist.hpp"
 #include "value_lists.hpp"
 #include "erase.hpp"
+#include "remove_duplicates.hpp"
 
+#include "is_derived.hpp"
 
 
 int main()
