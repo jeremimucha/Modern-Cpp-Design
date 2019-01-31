@@ -8,10 +8,11 @@
 
 
 template<typename Derived, typename Base>
-struct is_derived_from : if_then_else_t<IsConvertible<Derived, Base> &&
-                                 !is_same_v<Derived, void>,
-                                 std::true_type,
-                                 std::false_type>
+struct is_derived_from
+    : if_then_else_t<IsConvertible<Derived const*, Base const*> &&
+                     !is_same_v<Derived const*, void const*>,
+                     std::true_type,
+                     std::false_type>
 {
 };
 

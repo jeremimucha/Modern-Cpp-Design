@@ -18,7 +18,8 @@
 #include "remove_duplicates.hpp"
 
 #include "is_derived.hpp"
-
+#include "most_derived.hpp"
+#include "most_derived_first.hpp"
 
 int main()
 {
